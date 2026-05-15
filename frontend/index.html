@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intelligent Pond Management System</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fa-solid fa-water"></i>
+                <h2>PondSys</h2>
+            </div>
+            <ul class="nav-links">
+                <li class="active"><i class="fa-solid fa-chart-pie"></i> Dashboard</li>
+                <li><i class="fa-solid fa-chart-line"></i> Analytics</li>
+                <li><i class="fa-solid fa-bell"></i> Alerts</li>
+                <li><i class="fa-solid fa-gear"></i> Settings</li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header>
+                <div>
+                    <h1>Dashboard</h1>
+                    <p>Real-time pond monitoring system</p>
+                </div>
+                <div class="status-badge" id="overall-status">
+                    Processing...
+                </div>
+            </header>
+
+            <!-- KPI Cards -->
+            <div class="cards-grid">
+                <!-- Temperature -->
+                <div class="kpi-card temp-card">
+                    <div class="card-icon"><i class="fa-solid fa-temperature-half"></i></div>
+                    <div class="card-info">
+                        <h3>Temperature</h3>
+                        <h2 id="temp-val">-- °C</h2>
+                    </div>
+                </div>
+                <!-- pH Level -->
+                <div class="kpi-card ph-card">
+                    <div class="card-icon"><i class="fa-solid fa-vial"></i></div>
+                    <div class="card-info">
+                        <h3>pH Level</h3>
+                        <h2 id="ph-val">--</h2>
+                    </div>
+                </div>
+                <!-- Turbidity -->
+                <div class="kpi-card turb-card">
+                    <div class="card-icon"><i class="fa-solid fa-droplet-slash"></i></div>
+                    <div class="card-info">
+                        <h3>Turbidity</h3>
+                        <h2 id="turb-val">-- %</h2>
+                    </div>
+                </div>
+                <!-- Weather -->
+                <div class="kpi-card weather-card">
+                    <div class="card-icon"><i class="fa-solid fa-cloud-sun"></i></div>
+                    <div class="card-info">
+                        <h3>Weather</h3>
+                        <h2 id="weather-val">--</h2>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="charts-section">
+                <div class="chart-container">
+                    <h3>Water Quality Trends (Last 24h)</h3>
+                    <canvas id="historyChart"></canvas>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/api.js"></script>
+    <script src="js/alerts.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>

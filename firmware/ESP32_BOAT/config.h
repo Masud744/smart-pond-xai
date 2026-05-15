@@ -6,7 +6,7 @@
 #define WIFI_PASSWORD "dhaka1213"
 
 // ── Backend ──
-#define BACKEND_URL "http://10.0.21.218:8000/api/sensor"
+#define BACKEND_URL "https://pond-management-backend.onrender.com/api/sensor"
 
 // ── Motor Pins ──
 #define IN1 27

@@ -26,7 +26,7 @@ def save_sensor_data(temp: float, ph: float, turbidity: int, status: str):
             .field("ph",          ph)
             .field("turbidity",   turbidity)
             .tag("status",        status)
-            .time(datetime.now(timezone.utc), WritePrecision.SECONDS)
+            .time(datetime.now(timezone.utc), WritePrecision.S)
         )
         write_api.write(
             bucket = settings.INFLUXDB_BUCKET,
