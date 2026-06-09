@@ -1,7 +1,0 @@
-fastapi
-uvicorn
-influxdb-client
-httpx
-python-dotenv
-pydantic
-requests

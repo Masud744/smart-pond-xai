@@ -1,37 +1,61 @@
 import requests
-from app.config import settings
 import logging
+from datetime import datetime, timezone
+from app.config import settings
 
 logger = logging.getLogger(__name__)
 
-def get_weather():
-    """OpenWeatherMap থেকে current weather আনে"""
+# Cache — ১৫ মিনিট পর পর fetch করবে
+_weather_cache = None
+_cache_time    = None
+CACHE_MINUTES  = settings.WEATHER_INTERVAL
+
+
+def get_weather() -> dict | None:
+    """Open-Meteo থেকে current weather আনে (Free, No API Key)"""
+    global _weather_cache, _cache_time
+
+    now = datetime.now(timezone.utc)
+
+    # Cache valid থাকলে সেটাই return করো
+    if _weather_cache and _cache_time:
+        diff = (now - _cache_time).total_seconds() / 60
+        if diff < CACHE_MINUTES:
+            return _weather_cache
+
     try:
         url = (
-            f"https://api.openweathermap.org/data/2.5/weather"
-            f"?q={settings.OPENWEATHER_CITY},{settings.OPENWEATHER_COUNTRY}"
-            f"&appid={settings.OPENWEATHER_API_KEY}"
-            f"&units=metric"
+            f"https://api.open-meteo.com/v1/forecast"
+            f"?latitude={settings.WEATHER_LATITUDE}"
+            f"&longitude={settings.WEATHER_LONGITUDE}"
+            f"&current=temperature_2m,relative_humidity_2m,"
+            f"precipitation,wind_speed_10m,surface_pressure"
+            f"&timezone=Asia/Dhaka"
         )
-        response = requests.get(url, timeout=5)
+
+        response = requests.get(url, timeout=10)
         data     = response.json()
 
-        if response.status_code != 200:
-            logger.warning(f"Weather API error: {data}")
-            return None
+        if response.status_code != 200 or "current" not in data:
+            logger.warning(f"Open-Meteo error: {data}")
+            return _weather_cache  # পুরনো cache return করো
 
-        # Rainfall থাকে শুধু বৃষ্টি হলে
-        rainfall = 0.0
-        if "rain" in data:
-            rainfall = data["rain"].get("1h", 0.0)
+        current = data["current"]
 
-        return {
-            "temperature" : data["main"]["temp"],
-            "humidity"    : data["main"]["humidity"],
-            "rainfall"    : rainfall,
-            "description" : data["weather"][0]["description"]
+        weather = {
+            "air_temperature" : current.get("temperature_2m",        0.0),
+            "humidity"        : current.get("relative_humidity_2m",  0.0),
+            "rainfall"        : current.get("precipitation",          0.0),
+            "wind_speed"      : current.get("wind_speed_10m",         0.0),
+            "pressure"        : current.get("surface_pressure",       0.0),
         }
+
+        _weather_cache = weather
+        _cache_time    = now
+
+        logger.info(f"Weather fetched ✓ Temp:{weather['air_temperature']}°C")
+        return weather
 
     except Exception as e:
         logger.error(f"Weather fetch error: {e}")
-        return None
+        return _weather_cache  # error হলে পুরনো cache return করো
