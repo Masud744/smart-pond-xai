@@ -1,7 +1,21 @@
+# API
 fastapi
 uvicorn[standard]
-influxdb-client
-httpx
 python-dotenv
 pydantic
+httpx
 requests
+
+# Database
+influxdb-client
+
+# ML
+scikit-learn
+xgboost
+joblib
+numpy
+pandas
+shap
+
+# Email
+secure-smtplib
