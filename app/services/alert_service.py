@@ -36,8 +36,10 @@ def send_email_alert(subject: str, message: str):
         return False
 
 
+from app.services.influx_service import save_alert
+
 def check_and_alert(status: str, temp: float, ph: float, turbidity: int):
-    """Status খারাপ হলে email alert পাঠায়"""
+    """Status খারাপ হলে email alert পাঠায় এবং InfluxDB তে save করে"""
     global last_alerted_status
 
     # একই status এ আগে alert গেলে আবার পাঠাবো না
@@ -56,6 +58,7 @@ def check_and_alert(status: str, temp: float, ph: float, turbidity: int):
             f"🧹 Manual cleaning required!"
         )
         send_email_alert(subject, message)
+        save_alert(alert_type="Water Quality", severity="CRITICAL", message=f"Water quality dropped to POOR. Temp: {temp}°C, pH: {ph}, Turbidity: {turbidity}%")
 
     elif status == "MODERATE":
         subject = "⚠️ POND WARNING — WATER QUALITY MODERATE"
@@ -68,6 +71,7 @@ def check_and_alert(status: str, temp: float, ph: float, turbidity: int):
             f"👁️  Please monitor the pond closely."
         )
         send_email_alert(subject, message)
+        save_alert(alert_type="Water Quality", severity="WARNING", message=f"Water quality dropped to MODERATE. Temp: {temp}°C, pH: {ph}, Turbidity: {turbidity}%")
 
     elif status == "GOOD" and last_alerted_status in ["POOR", "MODERATE"]:
         subject = "✅ POND RECOVERED — WATER QUALITY GOOD"
@@ -80,5 +84,6 @@ def check_and_alert(status: str, temp: float, ph: float, turbidity: int):
             f"🐟 Fish feeding resumed!"
         )
         send_email_alert(subject, message)
+        save_alert(alert_type="Water Quality", severity="INFO", message=f"Water quality recovered to GOOD. Temp: {temp}°C, pH: {ph}, Turbidity: {turbidity}%")
 
-    last_alerted_status = status
+    last_alerted_status = status

@@ -64,7 +64,7 @@ def get_latest_reading() -> dict | None:
     try:
         query = f'''
         from(bucket: "{BUCKET}")
-        |> range(start: -2h)
+        |> range(start: -24h, stop: 1h)
         |> filter(fn: (r) => r._measurement == "water_sensor_data")
         |> filter(fn: (r) => r.pond_id == "{POND}")
         |> last()
@@ -74,11 +74,13 @@ def get_latest_reading() -> dict | None:
         if result and result[0].records:
             r = result[0].records[0]
             return {
-                "temperature" : r.values.get("water_temperature", 0),
-                "ph"          : r.values.get("ph", 0),
+                "temperature" : r.values.get("water_temperature", 0.0),
+                "ph"          : r.values.get("ph", 0.0),
+                "ph_level"    : r.values.get("ph", 0.0),
                 "turbidity"   : int(r.values.get("turbidity", 0)),
                 "status"      : r.values.get("status", "UNKNOWN"),
-                "timestamp"   : str(r.get_time())
+                "timestamp"   : str(r.get_time()),
+                "time"        : str(r.get_time())
             }
         return None
     except Exception as e:
@@ -90,7 +92,7 @@ def get_history(hours: int = 24) -> list:
     try:
         query = f'''
         from(bucket: "{BUCKET}")
-        |> range(start: -{hours}h)
+        |> range(start: -{hours}h, stop: 1h)
         |> filter(fn: (r) => r._measurement == "water_sensor_data")
         |> filter(fn: (r) => r.pond_id == "{POND}")
         |> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")
@@ -98,12 +100,14 @@ def get_history(hours: int = 24) -> list:
         '''
         result  = query_api.query(query, org=ORG)
         history = []
-        if result:
+        if result and len(result) > 0:
             for r in result[0].records:
                 history.append({
                     "time"        : str(r.get_time()),
-                    "temperature" : r.values.get("water_temperature", 0),
-                    "ph"          : r.values.get("ph", 0),
+                    "timestamp"   : str(r.get_time()),
+                    "temperature" : r.values.get("water_temperature", 0.0),
+                    "ph"          : r.values.get("ph", 0.0),
+                    "ph_level"    : r.values.get("ph", 0.0),
                     "turbidity"   : int(r.values.get("turbidity", 0)),
                     "status"      : r.values.get("status", "UNKNOWN")
                 })
@@ -123,7 +127,7 @@ def save_weather_data(weather: dict) -> bool:
             Point("weather_data")
             .tag("pond_id", POND)
             .field("air_temperature", float(weather.get("air_temperature", 0)))
-            .field("humidity",        float(weather.get("humidity",        0)))
+            .field("humidity",        int(weather.get("humidity",          0)))
             .field("rainfall",        float(weather.get("rainfall",        0)))
             .field("wind_speed",      float(weather.get("wind_speed",      0)))
             .field("pressure",        float(weather.get("pressure",        0)))
@@ -135,6 +139,37 @@ def save_weather_data(weather: dict) -> bool:
     except Exception as e:
         logger.error(f"Weather save error: {e}")
         return False
+
+
+def get_weather_history(hours: int = 24) -> list:
+    try:
+        query = f'''
+        from(bucket: "{BUCKET}")
+        |> range(start: -{hours}h, stop: 1h)
+        |> filter(fn: (r) => r._measurement == "weather_data")
+        |> filter(fn: (r) => r.pond_id == "{POND}")
+        |> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")
+        |> sort(columns: ["_time"])
+        '''
+        result = query_api.query(query, org=ORG)
+        history = []
+        if result and len(result) > 0:
+            for r in result[0].records:
+                history.append({
+                    "timestamp": str(r.get_time()),
+                    "time": str(r.get_time()),
+                    "air_temp": r.values.get("air_temperature", 0.0),
+                    "humidity": r.values.get("humidity", 0.0),
+                    "rainfall": r.values.get("rainfall", 0.0),
+                    "wind_speed": r.values.get("wind_speed", 0.0),
+                    "pressure": r.values.get("pressure", 0.0)
+                })
+        return history
+    except Exception as e:
+        logger.error(f"Weather history error: {e}")
+        return []
+
+
 
 
 # ════════════════════════════════════════
@@ -179,7 +214,7 @@ def get_latest_prediction() -> dict | None:
     try:
         q1 = f'''
         from(bucket: "{BUCKET}")
-        |> range(start: -48h)
+        |> range(start: -48h, stop: 1h)
         |> filter(fn: (r) => r._measurement == "fish_habitat_prediction")
         |> filter(fn: (r) => r.pond_id == "{POND}")
         |> last()
@@ -187,7 +222,7 @@ def get_latest_prediction() -> dict | None:
         '''
         q2 = f'''
         from(bucket: "{BUCKET}")
-        |> range(start: -48h)
+        |> range(start: -48h, stop: 1h)
         |> filter(fn: (r) => r._measurement == "water_quality_prediction")
         |> filter(fn: (r) => r.pond_id == "{POND}")
         |> last()
@@ -218,7 +253,7 @@ def get_prediction_history(hours: int = 24) -> list:
     try:
         query = f'''
         from(bucket: "{BUCKET}")
-        |> range(start: -{hours}h)
+        |> range(start: -{hours}h, stop: 1h)
         |> filter(fn: (r) => r._measurement == "fish_habitat_prediction")
         |> filter(fn: (r) => r.pond_id == "{POND}")
         |> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")
@@ -226,10 +261,12 @@ def get_prediction_history(hours: int = 24) -> list:
         '''
         result  = query_api.query(query, org=ORG)
         history = []
-        if result:
+        if result and len(result) > 0:
             for r in result[0].records:
                 history.append({
                     "time"            : str(r.get_time()),
+                    "timestamp"       : str(r.get_time()),
+                    "prediction"      : r.values.get("recommended_fish", "unknown"),
                     "recommended_fish": r.values.get("recommended_fish", "unknown"),
                     "habitat_status"  : r.values.get("habitat_status",   "unknown"),
                     "confidence"      : r.values.get("confidence_score", 0),
@@ -267,6 +304,55 @@ def save_xai_explanation(features: dict, shap_result: dict, model: str = "rf") -
         return False
 
 
+def get_xai_explanations_history(hours: int = 24) -> list:
+    try:
+        query = f'''
+        from(bucket: "{BUCKET}")
+        |> range(start: -{hours}h, stop: 1h)
+        |> filter(fn: (r) => r._measurement == "xai_explanations")
+        |> filter(fn: (r) => r.pond_id == "{POND}")
+        |> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")
+        |> sort(columns: ["_time"], desc: true)
+        '''
+        result = query_api.query(query, org=ORG)
+        history = []
+        if result and len(result) > 0:
+            for r in result[0].records:
+                t = str(r.get_time())
+                interp = r.values.get("interpretation", "")
+                top_feat = r.values.get("top_feature", "unknown")
+                
+                # Split one record into three separate feature rows for the frontend explorer
+                history.append({
+                    "timestamp": t,
+                    "time": t,
+                    "feature": "pH",
+                    "importance": r.values.get("ph_importance", 0.0),
+                    "direction": "positive" if top_feat == "ph" else "neutral",
+                    "explanation": interp
+                })
+                history.append({
+                    "timestamp": t,
+                    "time": t,
+                    "feature": "Temperature",
+                    "importance": r.values.get("temperature_importance", 0.0),
+                    "direction": "positive" if top_feat == "temperature" else "neutral",
+                    "explanation": interp
+                })
+                history.append({
+                    "timestamp": t,
+                    "time": t,
+                    "feature": "Turbidity",
+                    "importance": r.values.get("turbidity_importance", 0.0),
+                    "direction": "positive" if top_feat == "turbidity" else "neutral",
+                    "explanation": interp
+                })
+        return history
+    except Exception as e:
+        logger.error(f"XAI history error: {e}")
+        return []
+
+
 # ════════════════════════════════════════
 # FEEDING LOGS
 # ════════════════════════════════════════
@@ -294,7 +380,7 @@ def get_feeding_logs(hours: int = 24) -> list:
     try:
         query = f'''
         from(bucket: "{BUCKET}")
-        |> range(start: -{hours}h)
+        |> range(start: -{hours}h, stop: 1h)
         |> filter(fn: (r) => r._measurement == "feeding_logs")
         |> filter(fn: (r) => r.pond_id == "{POND}")
         |> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")
@@ -302,14 +388,27 @@ def get_feeding_logs(hours: int = 24) -> list:
         '''
         result = query_api.query(query, org=ORG)
         logs   = []
-        if result:
+        if result and len(result) > 0:
             for r in result[0].records:
+                mode = r.values.get("feeding_mode", "unknown")
+                duration = int(r.values.get("duration_seconds", 0))
+                reason = r.values.get("reason", "")
+                
+                # Calculate feed amount & mapping for the frontend
+                feed_amount = duration * 5.0
+                feed_type = "Standard Pellets"
+                
                 logs.append({
                     "time"             : str(r.get_time()),
-                    "mode"             : r.values.get("feeding_mode",    "unknown"),
+                    "timestamp"        : str(r.get_time()),
+                    "mode"             : mode,
                     "status"           : r.values.get("feeding_status",  "unknown"),
-                    "duration_seconds" : r.values.get("duration_seconds", 0),
-                    "reason"           : r.values.get("reason",          ""),
+                    "duration_seconds" : duration,
+                    "reason"           : reason,
+                    "feed_amount"      : feed_amount,
+                    "feed_type"        : feed_type,
+                    "method"           : mode.capitalize(),
+                    "notes"            : reason
                 })
         return logs
     except Exception as e:
@@ -338,3 +437,89 @@ def save_alert(alert_type: str, severity: str, message: str) -> bool:
     except Exception as e:
         logger.error(f"Alert save error: {e}")
         return False
+
+
+def get_alerts_history(hours: int = 24) -> list:
+    try:
+        query = f'''
+        from(bucket: "{BUCKET}")
+        |> range(start: -{hours}h, stop: 1h)
+        |> filter(fn: (r) => r._measurement == "alerts")
+        |> filter(fn: (r) => r.pond_id == "{POND}")
+        |> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")
+        |> sort(columns: ["_time"], desc: true)
+        '''
+        result = query_api.query(query, org=ORG)
+        history = []
+        if result and len(result) > 0:
+            for r in result[0].records:
+                history.append({
+                    "timestamp": str(r.get_time()),
+                    "time": str(r.get_time()),
+                    "alert_type": r.values.get("alert_type", "SYSTEM"),
+                    "severity": r.values.get("severity", "INFO"),
+                    "message": r.values.get("message", ""),
+                    "resolved": bool(r.values.get("resolved", False))
+                })
+        return history
+    except Exception as e:
+        logger.error(f"Alerts history error: {e}")
+        return []
+
+
+def get_quality_predictions_history(hours: int = 24) -> list:
+    try:
+        query = f'''
+        from(bucket: "{BUCKET}")
+        |> range(start: -{hours}h, stop: 1h)
+        |> filter(fn: (r) => r._measurement == "water_quality_prediction")
+        |> filter(fn: (r) => r.pond_id == "{POND}")
+        |> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")
+        |> sort(columns: ["_time"], desc: true)
+        '''
+        result = query_api.query(query, org=ORG)
+        history = []
+        if result and len(result) > 0:
+            for r in result[0].records:
+                pred_val = r.values.get("quality_class", "UNKNOWN")
+                history.append({
+                    "timestamp": str(r.get_time()),
+                    "time": str(r.get_time()),
+                    "prediction": pred_val,
+                    "confidence": r.values.get("confidence_score", 0.0),
+                    "status": pred_val,
+                    "temperature": 25.0,
+                    "ph_level": 7.0
+                })
+        return history
+    except Exception as e:
+        logger.error(f"Quality predictions history error: {e}")
+        return []
+
+
+def get_fish_habitat_predictions_history(hours: int = 24) -> list:
+    try:
+        query = f'''
+        from(bucket: "{BUCKET}")
+        |> range(start: -{hours}h, stop: 1h)
+        |> filter(fn: (r) => r._measurement == "fish_habitat_prediction")
+        |> filter(fn: (r) => r.pond_id == "{POND}")
+        |> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")
+        |> sort(columns: ["_time"], desc: true)
+        '''
+        result = query_api.query(query, org=ORG)
+        history = []
+        if result and len(result) > 0:
+            for r in result[0].records:
+                history.append({
+                    "timestamp": str(r.get_time()),
+                    "time": str(r.get_time()),
+                    "habitat_status": r.values.get("habitat_status", "UNKNOWN"),
+                    "suitability": r.values.get("confidence_score", 0.0),
+                    "fish_count": 100,
+                    "recommendation": r.values.get("recommended_fish", "unknown")
+                })
+        return history
+    except Exception as e:
+        logger.error(f"Habitat predictions history error: {e}")
+        return []

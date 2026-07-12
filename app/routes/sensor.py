@@ -44,6 +44,16 @@ async def receive_sensor_data(data: SensorData):
     if not saved:
         raise HTTPException(status_code=500, detail="Database save failed")
 
+    # Fetch weather and save to InfluxDB to maintain history
+    try:
+        from app.services.weather_service import get_weather
+        from app.services.influx_service import save_weather_data
+        weather = get_weather()
+        if weather:
+            save_weather_data(weather)
+    except Exception as e:
+        logger.error(f"Error saving weather during sensor post: {e}")
+
     check_and_alert(
         status    = status,
         temp      = data.temperature,
@@ -57,4 +67,4 @@ async def receive_sensor_data(data: SensorData):
         "success" : True,
         "message" : "Data saved",
         "status"  : status
-    }
+    }

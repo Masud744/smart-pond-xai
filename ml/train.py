@@ -45,7 +45,7 @@ print("=" * 62)
 # ── STEP 1: Load ──
 print("\n[1/7] Loading dataset...")
 if not os.path.exists(DATASET_PATH):
-    print(f"  ERROR: Dataset not found → {DATASET_PATH}")
+    print(f"  ERROR: Dataset not found -> {DATASET_PATH}")
     sys.exit(1)
 
 df_raw = pd.read_csv(DATASET_PATH)
@@ -79,7 +79,7 @@ for fish, cnt in df_aug["fish"].value_counts().items():
 
 # Save augmented dataset
 df_aug.to_csv(os.path.join(PROC_DIR, "cleaned_data.csv"), index=False)
-print(f"  Saved → {PROC_DIR}/cleaned_data.csv")
+print(f"  Saved -> {PROC_DIR}/cleaned_data.csv")
 
 # ── STEP 3: Preprocessing ──
 print("\n[3/7] Preprocessing...")
@@ -131,7 +131,7 @@ print(f"  {'Model':<20} {'Accuracy':>10} {'Precision':>10} {'Recall':>10} {'F1':
 print(f"  {'-'*64}")
 best_name = max(results, key=lambda k: results[k]["f1"])
 for name, r in results.items():
-    marker = " ← BEST" if name == best_name else ""
+    marker = " [BEST]" if name == best_name else ""
     print(f"  {name:<20} {r['accuracy']:>10.4f} {r['precision']:>10.4f} {r['recall']:>10.4f} {r['f1']:>10.4f}{marker}")
 
 # ── STEP 6: Detailed RF Report ──
@@ -150,13 +150,13 @@ joblib.dump(results["Decision Tree"]["model"], os.path.join(MODEL_DIR, "dt_model
 joblib.dump(results["SVM"]["model"],           os.path.join(MODEL_DIR, "svm_model.pkl"))
 # xgboost_model.pkl slot — RF copy for API compatibility
 joblib.dump(results["Random Forest"]["model"], os.path.join(MODEL_DIR, "xgboost_model.pkl"))
-print("  All models saved ✓")
+print("  All models saved [OK]")
 
 rf_model    = results["Random Forest"]["model"]
 importances = rf_model.feature_importances_
 print("\n  Feature Importance (Random Forest):")
 for feat, imp in sorted(zip(FEATURES, importances), key=lambda x: x[1], reverse=True):
-    bar = "█" * int(imp * 50)
+    bar = "#" * int(imp * 50)
     print(f"  {feat:<15} {imp:.4f}  {bar}")
 
 pd.DataFrame({"feature": FEATURES, "importance": importances}).sort_values(
@@ -172,10 +172,10 @@ for ph, temp, turb in tests:
     proba    = rf_model.predict_proba(feat)[0]
     top3     = np.argsort(proba)[::-1][:3]
     top3_str = "  ".join([f"{le.classes_[i]}({proba[i]*100:.0f}%)" for i in top3])
-    print(f"  pH={ph}, T={temp}°C, Turb={turb} → {le.classes_[idx]}({proba[idx]*100:.1f}%) | {top3_str}")
+    print(f"  pH={ph}, T={temp}C, Turb={turb} -> {le.classes_[idx]}({proba[idx]*100:.1f}%) | {top3_str}")
 
 print("\n" + "=" * 62)
 print(f"  Training Complete!")
-print(f"  Best: Random Forest — {results['Random Forest']['accuracy']*100:.2f}% accuracy")
+print(f"  Best: Random Forest - {results['Random Forest']['accuracy']*100:.2f}% accuracy")
 print(f"  Models: {MODEL_DIR}")
 print("=" * 62)
