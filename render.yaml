@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: smart-pond-backend
+    env: python
+    region: singapore
+    plan: free
+    buildCommand: pip install -r requirements.txt && python ml/train.py
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: INFLUXDB_URL
+        value: https://us-east-1-1.aws.cloud2.influxdata.com
+      - key: INFLUXDB_ORG
+        value: Team_Plan_B
+      - key: INFLUXDB_BUCKET
+        value: smart_pond_db
+      - key: INFLUXDB_TOKEN
+        sync: false
+      - key: WEATHER_LATITUDE
+        value: "24.07"
+      - key: WEATHER_LONGITUDE
+        value: "90.22"
+      - key: WEATHER_INTERVAL
+        value: "15"
+      - key: EMAIL_ENABLED
+        value: "false"
+      - key: POND_ID
+        value: "pond_01"
+      - key: DEVICE_ID
+        value: "esp32_01"
+      - key: FEED_INTERVAL_HOURS
+        value: "9"
+      - key: FEED_DURATION_SEC
+        value: "5"
