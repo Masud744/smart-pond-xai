@@ -1,6 +1,5 @@
 # An Explainable AI-Based Boat System for Intelligent Pond Management with LoRa Telemetry and Fish Habitat Suitability Prediction
 
-###  Smart Pond XAI Platform
 
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python">
