@@ -1,9 +1,0 @@
-{
-  "name": "smart-pond-xai",
-  "private": true,
-  "version": "1.0.0",
-  "scripts": {
-    "dev": "npm --prefix frontend-react run dev",
-    "build": "npm --prefix frontend-react run build"
-  }
-}

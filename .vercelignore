@@ -1,0 +1,9 @@
+# Ignore Python backend from Vercel deployment (backend is on Render)
+requirements.txt
+app/
+ml/
+firmware/
+Dockerfile
+render.yaml
+*.py
+*.pkl
