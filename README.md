@@ -14,6 +14,7 @@
   <img src="https://img.shields.io/badge/TailwindCSS-Styling-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white" alt="TailwindCSS">
   <img src="https://img.shields.io/badge/Recharts-Data%20Viz-22B5BF?style=flat-square" alt="Recharts">
   <img src="https://img.shields.io/badge/Open--Meteo-Weather%20API-FFA500?style=flat-square" alt="Open-Meteo">
+  <a href="https://smart-pond-xai1.vercel.app/"><img src="https://img.shields.io/badge/Vercel-Live%20Dashboard-000000?style=flat-square&logo=vercel&logoColor=white" alt="Vercel"></a>
   <img src="https://img.shields.io/badge/Render-Backend%20Hosting-46E3B7?style=flat-square&logo=render&logoColor=white" alt="Render">
   <img src="https://img.shields.io/badge/License-MIT-4CAF50?style=flat-square" alt="License">
   <img src="https://img.shields.io/badge/Build-Passing-brightgreen?style=flat-square" alt="Build">
@@ -21,6 +22,10 @@
 
 <p align="center">
   <b>An end-to-end IoT, Machine Learning, and Explainable AI (XAI) pond monitoring and fish habitat decision support platform powered by an autonomous ESP32 smart boat with long-range telemetry, InfluxDB Cloud time-series persistence, ensemble Random Forest models with local SHAP feature attributions, and a responsive React web dashboard.</b>
+</p>
+
+<p align="center">
+  🌐 <b>Live Web Dashboard:</b> <a href="https://smart-pond-xai1.vercel.app/">https://smart-pond-xai1.vercel.app</a>
 </p>
 
 ---
