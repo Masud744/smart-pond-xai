@@ -5,8 +5,18 @@ import { Sparkles, RefreshCw, Brain, Sliders, Award, AlertTriangle } from 'lucid
 import { api } from '../services/api';
 import DataTable from '../components/DataTable';
 
+const safeFormatDate = (v, fmt = 'MM/dd/yyyy HH:mm:ss') => {
+  if (!v) return '—';
+  try {
+    const d = new Date(typeof v === 'string' ? v.replace(' ', 'T') : v);
+    return isNaN(d.getTime()) ? '—' : format(d, fmt);
+  } catch {
+    return '—';
+  }
+};
+
 const COLS = [
-  { key: 'timestamp',   label: 'TIME',        render: v => v ? format(new Date(v), 'MM/dd/yyyy HH:mm:ss') : '—' },
+  { key: 'timestamp',   label: 'TIME',        render: v => safeFormatDate(v) },
   { key: 'feature',     label: 'FEATURE',     render: v => v ?? '—' },
   { key: 'importance',  label: 'IMPORTANCE',  render: v => v != null ? Number(v).toFixed(4) : '—' },
   { key: 'direction',   label: 'DIRECTION',   render: v => {
@@ -125,19 +135,24 @@ export default function XAIPredictions() {
       // Fallback/mock values for visual presentation if empty
       return [
         { name: 'pH Level', shap: 0.125, color: 'var(--color-emerald)' },
-        { name: 'Water Temperature', shap: -0.045, color: 'var(--color-rose)' },
+        { name: 'Water Temp', shap: -0.045, color: 'var(--color-rose)' },
         { name: 'Turbidity', shap: 0.218, color: 'var(--color-emerald)' }
       ];
     }
     
-    return Object.entries(latest.xai_explanation).map(([feat, val]) => {
-      const importanceValue = Number(val);
-      return {
-        name: feat === 'ph' ? 'pH Level' : feat === 'temperature' ? 'Water Temp' : 'Turbidity',
-        shap: +importanceValue.toFixed(4),
-        color: importanceValue >= 0 ? 'var(--color-emerald)' : 'var(--color-rose)'
-      };
-    });
+    // Check if xai_explanation contains feature_importance sub-object
+    const fiObj = latest.xai_explanation.feature_importance || latest.xai_explanation;
+    
+    return Object.entries(fiObj)
+      .filter(([feat]) => ['ph', 'temperature', 'turbidity'].includes(feat))
+      .map(([feat, val]) => {
+        const importanceValue = Number(val || 0);
+        return {
+          name: feat === 'ph' ? 'pH Level' : feat === 'temperature' ? 'Water Temp' : 'Turbidity',
+          shap: +importanceValue.toFixed(4),
+          color: importanceValue >= 0 ? 'var(--color-emerald)' : 'var(--color-rose)'
+        };
+      });
   };
 
   const shapWaterfall = localShapData();

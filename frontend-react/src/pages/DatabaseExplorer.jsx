@@ -114,7 +114,12 @@ export default function DatabaseExplorer() {
       else raw = [];
       
       const arr = Array.isArray(raw) ? raw : (raw?.data ?? []);
-      setData(arr);
+      const sortedArr = [...arr].sort((a, b) => {
+        const tA = new Date(String(a.timestamp || a.time || 0).replace(' ', 'T')).getTime();
+        const tB = new Date(String(b.timestamp || b.time || 0).replace(' ', 'T')).getTime();
+        return (isNaN(tB) ? 0 : tB) - (isNaN(tA) ? 0 : tA);
+      });
+      setData(sortedArr);
       setLastUpd(format(new Date(), 'HH:mm:ss'));
     } catch (e) {
       setError(e.message);
@@ -225,6 +230,8 @@ export default function DatabaseExplorer() {
             <option value="24">Last 24 Hours</option>
             <option value="72">Last 3 Days</option>
             <option value="168">Last 7 Days</option>
+            <option value="720">Last 30 Days</option>
+            <option value="2160">Last 90 Days</option>
           </select>
         </div>
 

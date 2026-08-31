@@ -28,7 +28,7 @@ async def get_dashboard_data():
 
 
 @router.get("/history")
-async def get_sensor_history(hours: int = Query(default=24, ge=1, le=168)):
+async def get_sensor_history(hours: int = Query(default=24, ge=1, le=2160)):
     """Last N ঘন্টার history data — default 24 ঘন্টা"""
 
     history = get_history(hours=hours)
@@ -70,31 +70,31 @@ from app.services.influx_service import (
 )
 
 @router.get("/weather")
-async def get_weather_data_history(hours: int = Query(default=24, ge=1, le=168)):
+async def get_weather_data_history(hours: int = Query(default=24, ge=1, le=2160)):
     data = get_weather_history(hours=hours)
     return {"hours": hours, "count": len(data), "data": data}
 
 @router.get("/predictions")
-async def get_predictions_data_history(hours: int = Query(default=24, ge=1, le=168)):
+async def get_predictions_data_history(hours: int = Query(default=24, ge=1, le=2160)):
     data = get_quality_predictions_history(hours=hours)
     return {"hours": hours, "count": len(data), "data": data}
 
 @router.get("/alerts")
-async def get_alerts_data_history(hours: int = Query(default=24, ge=1, le=168)):
+async def get_alerts_data_history(hours: int = Query(default=24, ge=1, le=2160)):
     data = get_alerts_history(hours=hours)
     return {"hours": hours, "count": len(data), "data": data}
 
 @router.get("/xai")
-async def get_xai_data_history(hours: int = Query(default=24, ge=1, le=168)):
+async def get_xai_data_history(hours: int = Query(default=24, ge=1, le=2160)):
     data = get_xai_explanations_history(hours=hours)
     return {"hours": hours, "count": len(data), "data": data}
 
 @router.get("/feeding")
-async def get_feeding_data_history(hours: int = Query(default=24, ge=1, le=168)):
+async def get_feeding_data_history(hours: int = Query(default=24, ge=1, le=2160)):
     data = get_feeding_logs(hours=hours)
     return {"hours": hours, "count": len(data), "data": data}
 
 @router.get("/fish-habitat")
-async def get_fish_habitat_data_history(hours: int = Query(default=24, ge=1, le=168)):
+async def get_fish_habitat_data_history(hours: int = Query(default=24, ge=1, le=2160)):
     data = get_fish_habitat_predictions_history(hours=hours)
     return {"hours": hours, "count": len(data), "data": data}

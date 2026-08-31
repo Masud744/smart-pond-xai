@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { ChevronUp, ChevronDown, ChevronsUpDown, Inbox } from 'lucide-react';
 
-export default function DataTable({ columns, data = [], rowsPerPageOptions = [10, 25, 50] }) {
+export default function DataTable({ columns, data = [], rowsPerPageOptions = [10, 25, 50, 100, 500] }) {
   const [sortCol, setSortCol]   = useState(columns[0]?.key ?? '');
   const [sortDir, setSortDir]   = useState('desc');
   const [page, setPage]         = useState(1);

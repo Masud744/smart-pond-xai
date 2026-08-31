@@ -1,23 +1,50 @@
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://127.0.0.1:8000/api';
-
+export const API_BASE = import.meta.env.VITE_API_BASE || import.meta.env.VITE_API_BASE_URL || 'https://smart-pond-api.onrender.com/api';
+const FALLBACK_API_BASE = 'https://smart-pond-api.onrender.com/api';
 
 async function apiFetch(endpoint) {
-  const res = await fetch(`${API_BASE}${endpoint}`);
-  if (!res.ok) throw new Error(`API error: ${res.status}`);
-  return res.json();
+  try {
+    const res = await fetch(`${API_BASE}${endpoint}`);
+    if (!res.ok) throw new Error(`API error: ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    if (API_BASE !== FALLBACK_API_BASE) {
+      console.warn(`Primary API connection failed (${err.message}). Retrying fallback URL: ${FALLBACK_API_BASE}${endpoint}`);
+      const res = await fetch(`${FALLBACK_API_BASE}${endpoint}`);
+      if (!res.ok) throw new Error(`API error: ${res.status}`);
+      return await res.json();
+    }
+    throw err;
+  }
 }
 
 async function apiPost(endpoint, body) {
-  const res = await fetch(`${API_BASE}${endpoint}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => null);
-    throw new Error(errorData?.detail || `API error: ${res.status}`);
+  try {
+    const res = await fetch(`${API_BASE}${endpoint}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => null);
+      throw new Error(errorData?.detail || `API error: ${res.status}`);
+    }
+    return await res.json();
+  } catch (err) {
+    if (API_BASE !== FALLBACK_API_BASE) {
+      console.warn(`Primary API POST failed (${err.message}). Retrying fallback URL: ${FALLBACK_API_BASE}${endpoint}`);
+      const res = await fetch(`${FALLBACK_API_BASE}${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => null);
+        throw new Error(errorData?.detail || `API error: ${res.status}`);
+      }
+      return await res.json();
+    }
+    throw err;
   }
-  return res.json();
 }
 
 export const api = {

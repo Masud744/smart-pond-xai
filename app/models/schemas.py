@@ -8,6 +8,7 @@ class SensorData(BaseModel):
     ph          : float = Field(..., ge=0,   le=14)
     turbidity   : int   = Field(..., ge=0,   le=100)
     status      : Optional[str] = Field(None, pattern="^(GOOD|MODERATE|POOR)$")
+    device_id   : Optional[str] = Field(None, description="Identifier of the sending device or simulator")
 
 # ── Dashboard এ যাওয়া data ──
 class SensorResponse(BaseModel):

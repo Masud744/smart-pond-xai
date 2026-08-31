@@ -67,7 +67,7 @@ void loop()
       Serial.println("Status    : " + statusText);
       Serial.println("────────────────────────");
 
-      bool sent = sendSensorData(temp, ph, turbidity, statusText);
+      bool sent = sendSensorDataSafely(temp, ph, turbidity, statusText);
       Serial.println(sent ? "[API] Sent ✓" : "[API] Failed ✗");
     }
 

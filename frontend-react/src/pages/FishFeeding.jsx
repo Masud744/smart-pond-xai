@@ -5,8 +5,18 @@ import { Fish, RefreshCw, AlertTriangle, Play, HelpCircle, Calendar, PlusCircle,
 import { api } from '../services/api';
 import DataTable from '../components/DataTable';
 
+const safeFormatDate = (v, fmt = 'MM/dd/yyyy HH:mm:ss') => {
+  if (!v) return '—';
+  try {
+    const d = new Date(typeof v === 'string' ? v.replace(' ', 'T') : v);
+    return isNaN(d.getTime()) ? '—' : format(d, fmt);
+  } catch {
+    return '—';
+  }
+};
+
 const COLS = [
-  { key: 'timestamp',   label: 'TIME',            render: v => v ? format(new Date(v), 'MM/dd/yyyy HH:mm:ss') : '—' },
+  { key: 'timestamp',   label: 'TIME',            render: v => safeFormatDate(v) },
   { key: 'feed_amount', label: 'FEED AMOUNT (G)',  render: v => v != null ? Number(v).toFixed(1) : '—' },
   { key: 'feed_type',   label: 'FEED TYPE',        render: v => v ?? '—' },
   { key: 'method',      label: 'METHOD',           render: v => v ?? '—' },
@@ -53,7 +63,18 @@ export default function FishFeeding() {
         duration: Number(feedDuration),
         reason: `${feedReason} (${calculatedAmount}g)`
       });
-      setSuccess(`Feeding session completed! Duration: ${res.duration_seconds}s. Log saved.`);
+
+      // Optimistically insert new record into local state so UI updates instantly
+      const newLog = {
+        timestamp: res.timestamp || new Date().toISOString(),
+        feed_amount: calculatedAmount,
+        feed_type: 'Standard Pellets',
+        method: 'Manual',
+        notes: res.reason || feedReason
+      };
+
+      setFeedData(prev => [newLog, ...prev]);
+      setSuccess(`Feeding session completed! Duration: ${res.duration_seconds ?? feedDuration}s (${calculatedAmount}g). Log saved.`);
       setTimeout(() => setSuccess(''), 4000);
       load();
     } catch (e) {
@@ -68,7 +89,7 @@ export default function FishFeeding() {
 
   /* chart: last 14 feedings */
   const chartData = feedData.slice(0, 14).reverse().map((r, i) => ({
-    label: r.timestamp ? format(new Date(r.timestamp), 'MM/dd HH:mm') : `#${i+1}`,
+    label: r.timestamp ? safeFormatDate(r.timestamp, 'MM/dd HH:mm') : `#${i+1}`,
     amount: r.feed_amount != null ? +Number(r.feed_amount).toFixed(1) : 0,
   }));
 

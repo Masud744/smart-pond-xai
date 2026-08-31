@@ -392,11 +392,15 @@ export default function Dashboard() {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           {lastUpdated && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text-secondary)', background: 'var(--bg-secondary)', padding: '6px 12px', borderRadius: 8, border: '1px solid var(--border-color)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, color: 'var(--text-secondary)', background: 'var(--bg-secondary)', padding: '6px 14px', borderRadius: 8, border: '1px solid var(--border-color)', boxShadow: '0 2px 8px rgba(0,0,0,0.12)' }}>
               <span className="pulse-dot" />
-              <span style={{ fontWeight: 600 }}>LIVE SYNC</span>
+              <span style={{ fontWeight: 700, color: '#10b981', letterSpacing: '0.03em' }}>REAL HARDWARE</span>
               <span style={{ color: 'var(--border-color)' }}>|</span>
-              <span style={{ color: 'var(--text-muted)' }}>Updated {lastUpdated}</span>
+              <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>Device: {latest?.device_id || 'esp32_01'}</span>
+              <span style={{ color: 'var(--border-color)' }}>|</span>
+              <span style={{ color: 'var(--text-muted)' }}>
+                Last Data: {latest?.timestamp ? (function(){ try { return format(new Date(String(latest.timestamp).replace(' ', 'T')), 'HH:mm:ss'); } catch(e){ return lastUpdated; } })() : lastUpdated}
+              </span>
             </div>
           )}
           <button className="btn-secondary animate-pulse" onClick={load} disabled={loading} style={{ padding: '8px 16px' }}>

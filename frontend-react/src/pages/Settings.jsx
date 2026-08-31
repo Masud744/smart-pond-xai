@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Settings as SettingsIcon, Save, Server, Bell, Eye, RefreshCw, ShieldAlert, Cpu, CheckCircle } from 'lucide-react';
+import { API_BASE } from '../services/api';
 
 const Section = ({ title, icon: Icon, children }) => (
   <div className="card-premium" style={{ marginBottom: 20, overflow: 'hidden', padding: 0 }}>
@@ -47,7 +48,7 @@ const Toggle = ({ value, onChange, label }) => (
 );
 
 export default function Settings() {
-  const [apiUrl,      setApiUrl]      = useState('http://127.0.0.1:8000/api');
+  const [apiUrl,      setApiUrl]      = useState(API_BASE);
   const [refreshInt,  setRefreshInt]  = useState('30');
   const [alertEmail,  setAlertEmail]  = useState('alerts@pond-monitoring.io');
   const [tempMin,     setTempMin]     = useState('20');

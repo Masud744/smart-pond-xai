@@ -155,7 +155,7 @@ async def get_latest():
 
 
 @router.get("/predict/history")
-async def get_history(hours: int = Query(default=24, ge=1, le=168)):
+async def get_history(hours: int = Query(default=24, ge=1, le=2160)):
     """Last N ঘন্টার prediction history"""
     data = get_prediction_history(hours=hours)
     return {

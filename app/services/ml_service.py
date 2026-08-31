@@ -112,11 +112,12 @@ def _assess_water_quality(ph: float, temp: float, turbidity: float) -> tuple:
     turb_good = turbidity <= 30
 
     ph_mod    = 6.0 <= ph <= 9.0
+    temp_mod  = 15.0 <= temp <= 38.0
     turb_mod  = turbidity <= 60
 
     if ph_good and temp_good and turb_good:
         return "GOOD", "SUITABLE"
-    elif ph_mod and turb_mod:
+    elif ph_mod and temp_mod and turb_mod:
         return "MODERATE", "STRESS"
     else:
         return "POOR", "RISK"

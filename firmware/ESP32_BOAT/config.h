@@ -2,11 +2,12 @@
 #define CONFIG_H
 
 // ── WiFi Credentials ──
-#define WIFI_SSID "BDU-Hostel2"
-#define WIFI_PASSWORD "dhaka1213"
+#define WIFI_SSID "Only for Rifat"
+#define WIFI_PASSWORD "22222222"
 
 // ── Backend ──
-#define BACKEND_URL "https://pond-management-backend.onrender.com/api/sensor"
+#define BACKEND_URL "https://smart-pond-api.onrender.com/api/sensor"
+
 
 // ── Motor Pins ──
 #define IN1 27

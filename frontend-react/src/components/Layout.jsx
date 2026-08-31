@@ -6,6 +6,7 @@ import {
   Menu, X
 } from 'lucide-react';
 import UnderwaterBackground from './UnderwaterBackground';
+import { API_BASE } from '../services/api';
 
 const NAV = [
   { to: '/',               label: 'Dashboard',      icon: LayoutDashboard },
@@ -33,7 +34,7 @@ export default function Layout({ children }) {
     async function checkHealth() {
       setChecking(true);
       try {
-        const res = await fetch('http://127.0.0.1:8000/api/status');
+        const res = await fetch(`${API_BASE}/status`);
         if (res.ok) setConnectionOk(true);
         else setConnectionOk(false);
       } catch (e) {

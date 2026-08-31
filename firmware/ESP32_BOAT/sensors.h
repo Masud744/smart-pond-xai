@@ -63,7 +63,7 @@ float getPH()
 
   // Two-point calibration formula
   float slope = (7.0 - 4.0) / (PH_CAL_VOLTAGE_7 - PH_CAL_VOLTAGE_4);
-  float ph = 7.0 + slope * (PH_CAL_VOLTAGE_7 - voltage);
+  float ph = 7.0 + slope * (voltage - PH_CAL_VOLTAGE_7);
 
   return constrain(ph, 0.0, 14.0);
 }
@@ -78,14 +78,15 @@ WaterStatus getWaterStatus(float ph, float temp, int turbidity)
   bool turbGood = (turbidity <= TURB_GOOD_MAX);
 
   bool phMod = (ph >= PH_MOD_MIN && ph <= PH_MOD_MAX);
+  bool tempMod = (temp >= 15.0 && temp <= 38.0 && temp != -1.0);
   bool turbMod = (turbidity <= TURB_MOD_MAX);
 
   // তিনটাই ঠিক থাকলে GOOD
   if (phGood && tempGood && turbGood)
     return GOOD;
 
-  // দুইটা মোটামুটি ঠিক থাকলে MODERATE
-  else if (phMod && turbMod)
+  // তিনটাই সহ্যসীমার মধ্যে থাকলে MODERATE
+  else if (phMod && tempMod && turbMod)
     return MODERATE;
 
   // নাহলে POOR

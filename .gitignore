@@ -1,30 +1,64 @@
-# Python
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
+*$py.class
 *.pyc
+
+# Virtual Environment
 venv/
+env/
+ENV/
+
+# Environment Variables & Secrets
 .env
+.env.local
+.env.*.local
+
+# Databases & SQLite
 *.db
+*.sqlite3
 
-# ML Models
+# ML Models & Large Binaries
 ml/models/*.pkl
+!ml/models/rf_model.pkl
+!ml/models/scaler.pkl
+!ml/models/xgboost_model.pkl
 
-# IDE
+# IDEs and Editors
 .idea/
 .vscode/
+*.swp
+*.swo
 
-# Node.js
+# Node / Frontend Build Artifacts
 node_modules/
 dist/
 /frontend/node_modules/
 /frontend/dist/
+/frontend-react/node_modules/
+/frontend-react/dist/
 
-# OS
+# OS Specific
 .DS_Store
+Thumbs.db
 *.log
 
-# Docs
-docs/
-
-# Python cache
+# Testing & Coverage
 .pytest_cache/
+.coverage
+htmlcov/
+
+# Local Simulator & Test Scripts
+simulate_sensor*
+*.disabled
+
+# Draft Research & Private Notes
+ARCHITECTURE.md
+PAPER_NOTES.md
+project.md
+research/
+scratch/
+
+# Firmware Backups & Drafts
+firmware_v2*/
+

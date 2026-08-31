@@ -14,12 +14,13 @@ def calculate_status(ph: float, temp: float, turbidity: int) -> str:
     temp_good = 20.0 <= temp <= 32.0
     turb_good = turbidity <= 30
 
-    ph_mod  = 6.0 <= ph <= 9.0
+    ph_mod   = 6.0 <= ph <= 9.0
+    temp_mod = 15.0 <= temp <= 38.0
     turb_mod = turbidity <= 60
 
     if ph_good and temp_good and turb_good:
         return "GOOD"
-    elif ph_mod and turb_mod:
+    elif ph_mod and temp_mod and turb_mod:
         return "MODERATE"
     else:
         return "POOR"
@@ -38,7 +39,8 @@ async def receive_sensor_data(data: SensorData):
         temp      = data.temperature,
         ph        = data.ph,
         turbidity = data.turbidity,
-        status    = status
+        status    = status,
+        device_id = data.device_id
     )
 
     if not saved:
@@ -58,7 +60,8 @@ async def receive_sensor_data(data: SensorData):
         status    = status,
         temp      = data.temperature,
         ph        = data.ph,
-        turbidity = data.turbidity
+        turbidity = data.turbidity,
+        device_id = data.device_id
     )
 
     logger.info(f"Data received → {status}")
