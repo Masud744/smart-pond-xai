@@ -84,38 +84,38 @@ The system is built on a decoupled, 4-tier architecture spanning Edge Firmware, 
 
 ```mermaid
 graph TD
-    subgraph Edge Layer [1. Edge Firmware Layer]
-        ESP32[ESP32 DevKit v1 Smart Boat]
-        Sensors[DS18B20 Temp | Gravity pH | Turbidity]
-        Actuators[L298N Motors | SG90 Feeder Servo]
+    subgraph EdgeLayer ["1. Edge Firmware Layer"]
+        ESP32["ESP32 DevKit v1 (Smart Boat)"]
+        Sensors["Sensors (DS18B20 Temp, Gravity pH, Turbidity)"]
+        Actuators["Actuators (L298N Motors, SG90 Feeder Servo)"]
         Sensors --> ESP32
         ESP32 --> Actuators
     end
 
-    subgraph Backend Layer [2. FastAPI Backend Server]
-        FastAPI[FastAPI Async REST API]
-        OpenMeteo[Open-Meteo Weather Service]
-        AlertService[SMTP Email Notification Service]
-        ESP32 -->|HTTP POST /api/sensor| FastAPI
-        OpenMeteo -->|Context Weather JSON| FastAPI
-        FastAPI -->|Critical Thresholds| AlertService
+    subgraph BackendLayer ["2. FastAPI Backend Server"]
+        FastAPI["FastAPI Async REST API"]
+        OpenMeteo["Open-Meteo Weather Service"]
+        AlertService["SMTP Email Notification Service"]
+        ESP32 -->|"HTTP POST /api/sensor"| FastAPI
+        OpenMeteo -->|"Context Weather JSON"| FastAPI
+        FastAPI -->|"Critical Threshold Alerts"| AlertService
     end
 
-    subgraph Data & ML Layer [3. Database & Explainable AI]
-        InfluxDB[(InfluxDB Cloud 2.0 Time-Series)]
-        RFModel[Random Forest Classifier 85.26%]
-        SHAP[SHAP TreeExplainer Local Attribution]
-        FastAPI -->|Write/Query Flux| InfluxDB
-        FastAPI -->|Feature Ingestion| RFModel
-        RFModel -->|Tree Traversal| SHAP
-        SHAP -->|Attribution Weights| FastAPI
+    subgraph DataMLLayer ["3. Database & Explainable AI"]
+        InfluxDB[("InfluxDB Cloud 2.0 Time-Series")]
+        RFModel["Random Forest Classifier (85.26%)"]
+        SHAP["SHAP TreeExplainer Local Attribution"]
+        FastAPI -->|"Write & Query Flux"| InfluxDB
+        FastAPI -->|"Feature Ingestion"| RFModel
+        RFModel -->|"Tree Traversal"| SHAP
+        SHAP -->|"Attribution Weights"| FastAPI
     end
 
-    subgraph Frontend Layer [4. Web Dashboard & UI]
-        React[Vite + React 18 Web Dashboard]
-        Recharts[Recharts Visualizations & Trends]
-        React -->|REST Calls| FastAPI
-        FastAPI -->|Real-Time Telemetry & Explanations| React
+    subgraph FrontendLayer ["4. Web Dashboard & UI"]
+        React["Vite + React 18 Web Dashboard"]
+        Recharts["Recharts Visualizations & Trends"]
+        React -->|"REST API Calls"| FastAPI
+        FastAPI -->|"Real-Time Telemetry & Explanations"| React
         React --> Recharts
     end
 ```
