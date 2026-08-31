@@ -30,6 +30,7 @@
 - [Overview & Motivation](#overview--motivation)
 - [Hardware Prototype & Smart Boat](#hardware-prototype--smart-boat)
 - [System Architecture](#system-architecture)
+- [Project Directory Structure](#project-directory-structure)
 - [Key Features](#key-features)
 - [Visual Showcase & Screenshots](#visual-showcase--screenshots)
 - [Hardware Specifications & Pinout](#hardware-specifications--pinout)
@@ -39,7 +40,6 @@
 - [REST API Reference](#rest-api-reference)
 - [Sensor Simulator (Testing Without Hardware)](#sensor-simulator-testing-without-hardware)
 - [Installation & Setup Guide](#installation--setup-guide)
-- [Project Directory Structure](#project-directory-structure)
 - [Known Difficulties, Bug Fixes & Engineering Lessons](#known-difficulties-bug-fixes--engineering-lessons)
 - [System Limitations & Future Scope](#system-limitations--future-scope)
 - [Author](#author)
@@ -128,6 +128,68 @@ graph TD
 5. **Inference & Explanation:** When triggered manually or automatically, the Random Forest model determines fish habitat suitability and the SHAP `TreeExplainer` computes exact percentage contributions for pH, temperature, and turbidity.
 6. **Alert Dispatch:** If water status degrades to `POOR` or `MODERATE`, the SMTP alert service delivers instant notification emails with root-cause diagnoses.
 7. **Presentation:** The React dashboard polls `/api/dashboard`, `/api/history`, `/api/xai`, and `/api/feeding`, rendering live gauge cards, interactive time-series charts, and SHAP waterfall explainers.
+
+---
+
+##  Project Directory Structure
+
+```
+smart-pond-xai/
+├── app/                              # FastAPI Backend Application Layer
+│   ├── config.py                     # App settings, environment vars & thresholds
+│   ├── main.py                       # FastAPI entry point, CORS & router registrations
+│   ├── models/
+│   │   └── schemas.py                # Pydantic schemas for data validation
+│   ├── routes/
+│   │   ├── dashboard.py              # /api/dashboard, /api/history, /api/status
+│   │   ├── feeding.py                # /api/feed, /api/feed/status, /api/feeding
+│   │   ├── ota.py                    # /api/ota/version, /api/ota/firmware
+│   │   ├── prediction.py             # /api/predict, /api/predict/auto, /api/predict/latest
+│   │   └── sensor.py                 # /api/sensor ingestion endpoint
+│   └── services/
+│       ├── alert_service.py          # SMTP notification dispatcher with deduplication
+│       ├── influx_service.py         # InfluxDB time-series queries (Flux) & persistence
+│       ├── ml_service.py             # Random Forest loader & inference engine
+│       ├── shap_service.py           # SHAP TreeExplainer local feature attribution
+│       └── weather_service.py        # Open-Meteo weather API client
+│
+├── firmware/
+│   └── ESP32_BOAT/                   # ESP32 C++ (Arduino Core) Firmware
+│       ├── ESP32_BOAT.ino            # Main setup and loop
+│       ├── bluetooth.h               # Bluetooth serial manual navigation
+│       ├── config.h                  # Wi-Fi credentials, pin mapping & thresholds
+│       ├── data_sender.h             # Async HTTP client telemetry dispatcher
+│       ├── motors.h                  # L298N DC motor driver controls
+│       ├── ota_update.h              # Firmware over-the-air updater
+│       ├── sensors.h                 # Sensor signal conditioning & calibration
+│       ├── servo_control.h           # SG90 feeder servo hatch actuation
+│       └── wifi_manager.h            # Wi-Fi auto-connect & reconnect handler
+│
+├── frontend-react/                   # Vite + React 18 Web Dashboard
+│   ├── src/
+│   │   ├── App.jsx                   # React Router route definitions
+│   │   ├── components/               # Layout, Navigation, DataTable, Digital Twin
+│   │   ├── pages/                    # Dashboard, XAI, Analytics, Feeding, Settings
+│   │   └── services/api.js           # Axios/Fetch API client wrapper
+│   ├── package.json                  # Frontend dependencies (Recharts, Lucide, Tailwind)
+│   └── vite.config.js                # Vite build configuration
+│
+├── ml/                               # Machine Learning & XAI Training Pipeline
+│   ├── data/raw/pond_dataset.csv     # Baseline aquaculture habitat records
+│   ├── models/                       # Serialized model weights (*.pkl) & scaler
+│   │   ├── rf_model.pkl              # Random Forest Classifier (85.26%)
+│   │   ├── dt_model.pkl              # Decision Tree Classifier
+│   │   ├── svm_model.pkl             # Support Vector Machine Classifier
+│   │   └── scaler.pkl                # Standard Scaler
+│   ├── train.py                      # 50x Gaussian noise augmented training pipeline
+│   └── predict.py                    # Standalone CLI prediction script
+│
+├── Images/                           # Project screenshots, prototype & visual assets
+├── requirements.txt                  # Python dependencies
+├── render.yaml                       # Cloud deployment blueprint
+├── Dockerfile                        # Containerization specification
+└── .env.example                      # Environment variables template
+```
 
 ---
 
@@ -456,68 +518,6 @@ Open **[http://localhost:5173](http://localhost:5173)** in your browser.
 2. Install required libraries via Library Manager: `OneWire`, `DallasTemperature`, `ESP32Servo`, `ArduinoJson`.
 3. Update your Wi-Fi SSID, Password, and Backend URL in `firmware/ESP32_BOAT/config.h`.
 4. Select board **ESP32 Dev Module** and flash via USB.
-
----
-
-##  Project Directory Structure
-
-```
-smart-pond-xai/
-├── app/                              # FastAPI Backend Application Layer
-│   ├── config.py                     # App settings, environment vars & thresholds
-│   ├── main.py                       # FastAPI entry point, CORS & router registrations
-│   ├── models/
-│   │   └── schemas.py                # Pydantic schemas for data validation
-│   ├── routes/
-│   │   ├── dashboard.py              # /api/dashboard, /api/history, /api/status
-│   │   ├── feeding.py                # /api/feed, /api/feed/status, /api/feeding
-│   │   ├── ota.py                    # /api/ota/version, /api/ota/firmware
-│   │   ├── prediction.py             # /api/predict, /api/predict/auto, /api/predict/latest
-│   │   └── sensor.py                 # /api/sensor ingestion endpoint
-│   └── services/
-│       ├── alert_service.py          # SMTP notification dispatcher with deduplication
-│       ├── influx_service.py         # InfluxDB time-series queries (Flux) & persistence
-│       ├── ml_service.py             # Random Forest loader & inference engine
-│       ├── shap_service.py           # SHAP TreeExplainer local feature attribution
-│       └── weather_service.py        # Open-Meteo weather API client
-│
-├── firmware/
-│   └── ESP32_BOAT/                   # ESP32 C++ (Arduino Core) Firmware
-│       ├── ESP32_BOAT.ino            # Main setup and loop
-│       ├── bluetooth.h               # Bluetooth serial manual navigation
-│       ├── config.h                  # Wi-Fi credentials, pin mapping & thresholds
-│       ├── data_sender.h             # Async HTTP client telemetry dispatcher
-│       ├── motors.h                  # L298N DC motor driver controls
-│       ├── ota_update.h              # Firmware over-the-air updater
-│       ├── sensors.h                 # Sensor signal conditioning & calibration
-│       ├── servo_control.h           # SG90 feeder servo hatch actuation
-│       └── wifi_manager.h            # Wi-Fi auto-connect & reconnect handler
-│
-├── frontend-react/                   # Vite + React 18 Web Dashboard
-│   ├── src/
-│   │   ├── App.jsx                   # React Router route definitions
-│   │   ├── components/               # Layout, Navigation, DataTable, Digital Twin
-│   │   ├── pages/                    # Dashboard, XAI, Analytics, Feeding, Settings
-│   │   └── services/api.js           # Axios/Fetch API client wrapper
-│   ├── package.json                  # Frontend dependencies (Recharts, Lucide, Tailwind)
-│   └── vite.config.js                # Vite build configuration
-│
-├── ml/                               # Machine Learning & XAI Training Pipeline
-│   ├── data/raw/pond_dataset.csv     # Baseline aquaculture habitat records
-│   ├── models/                       # Serialized model weights (*.pkl) & scaler
-│   │   ├── rf_model.pkl              # Random Forest Classifier (85.26%)
-│   │   ├── dt_model.pkl              # Decision Tree Classifier
-│   │   ├── svm_model.pkl             # Support Vector Machine Classifier
-│   │   └── scaler.pkl                # Standard Scaler
-│   ├── train.py                      # 50x Gaussian noise augmented training pipeline
-│   └── predict.py                    # Standalone CLI prediction script
-│
-├── Images/                           # Project screenshots, prototype & visual assets
-├── requirements.txt                  # Python dependencies
-├── render.yaml                       # Cloud deployment blueprint
-├── Dockerfile                        # Containerization specification
-└── .env.example                      # Environment variables template
-```
 
 ---
 
